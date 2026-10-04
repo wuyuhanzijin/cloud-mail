@@ -237,7 +237,12 @@ function openSend() {
 }
 
 function changeAside() {
-  uiStore.asideShow = !uiStore.asideShow
+  // 窄屏是抽屉，宽屏是「收起成图标栏」
+  if (window.innerWidth < 1025) {
+    uiStore.asideShow = !uiStore.asideShow
+  } else {
+    uiStore.asideCollapse = !uiStore.asideCollapse
+  }
 }
 
 function clickLogout() {
@@ -360,7 +365,7 @@ function formatName(email) {
   font-size: 12px;
   display: grid;
   height: 100%;
-  gap: 10px;
+  gap: 8px;
   grid-template-columns: auto auto 1fr;
 }
 
@@ -373,18 +378,22 @@ function formatName(email) {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 5px;
 
   .writer {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
     color: #ffffff;
-    background: linear-gradient(135deg, #1890ff, #3a80dd);
-    transition: all 0.3s ease;
+    background: var(--el-color-primary);
+    transition: background 0.15s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
 
     .writer-text {
       margin-left: 15px;
@@ -392,17 +401,22 @@ function formatName(email) {
       font-weight: bold;;
     }
   }
+
+  &:hover .writer {
+    background: var(--el-color-primary-dark-2);
+  }
 }
 
 .header-btn {
   display: inline-flex;
   align-items: center;
+  gap: 2px;
   height: 100%;
   min-width: 0;
 }
 
 .breadcrumb-item {
-  font-weight: bold;
+  font-weight: 500;
   font-size: 14px;
   color: var(--el-text-color-primary);
   overflow: hidden;
@@ -412,62 +426,67 @@ function formatName(email) {
 
 .toolbar {
   display: flex;
+  align-items: center;
   justify-content: end;
-  gap: 15px;
+  gap: 6px;
   @media (max-width: 767px) {
-    gap: 10px;
+    gap: 4px;
   }
 
   .icon-item {
     align-self: center;
     width: 30px;
     height: 30px;
-    border-radius: 4px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    color: var(--regular-text-color);
+    transition: background 0.15s ease, color 0.15s ease;
+
+    svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
   }
 
   .icon-item:hover {
     background: var(--base-fill);
+    color: var(--el-text-color-primary);
   }
 
   .notice {
-    font-size: 22px;
-    margin-right: 4px;
-  }
-
-  .dark-icon {
-    font-size: 20px;
-  }
-
-  .sun-icon {
-    font-size: 24px;
+    margin-right: 2px;
   }
 
   .avatar {
     display: flex;
     align-items: center;
+    gap: 2px;
     cursor: pointer;
+    padding-left: 4px;
 
     .avatar-text {
       background: var(--el-bg-color);
       color: var(--el-text-color-primary);
       height: 30px;
       width: 30px;
+      font-size: 13px;
+      font-weight: 600;
       display: flex;
       justify-content: center;
       align-items: center;
       border-radius: 8px;
-      border: 1px solid var(--dark-border);
+      border: 1px solid var(--mail-hairline-strong);
     }
 
     .setting-icon {
       position: relative;
       top: 0;
-      margin-right: 10px;
+      margin-right: 2px;
       bottom: 10px;
+      color: var(--secondary-text-color);
     }
   }
 

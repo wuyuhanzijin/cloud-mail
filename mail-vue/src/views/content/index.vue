@@ -272,12 +272,14 @@ const handleDelete = () => {
 }
 
 .header-actions {
-  padding: 9px 15px 8px;
+  height: 48px;
+  padding: 0 18px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
   box-shadow: var(--header-actions-border);
   font-size: 18px;
+  color: var(--regular-text-color);
   .star {
     display: flex;
     align-items: center;
@@ -286,29 +288,37 @@ const handleDelete = () => {
   }
   .icon {
     cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .icon:hover {
+    color: var(--el-color-primary);
   }
 }
 
 
 .scrollbar {
-  height: calc(100% - 38px);
+  height: calc(100% - 48px);
   width: 100%;
 }
 
 .container {
   font-size: 14px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 10px;
+  padding-left: 28px;
+  padding-right: 28px;
+  padding-top: 18px;
   @media (max-width: 1023px) {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 14px;
   }
 
   .email-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    margin-bottom: 16px;
+    word-break: break-word;
   }
 
   .htm-scrollbar {
@@ -319,26 +329,32 @@ const handleDelete = () => {
     flex-direction: column;
 
     .att {
-      margin-top: 30px;
-      margin-bottom: 30px;
+      margin-top: 26px;
+      margin-bottom: 26px;
       border: 1px solid var(--light-border-color);
-      padding: 14px;
-      border-radius: 6px;
+      padding: 12px 14px 14px;
+      border-radius: 10px;
       width: fit-content;
       .att-box {
         min-width: min(410px,calc(100vw - 60px));
         max-width: 600px;
         display: grid;
-        gap: 12px;
+        gap: 8px;
         grid-template-rows: 1fr;
       }
 
       .att-title {
-        margin-bottom: 8px;
+        margin-bottom: 10px;
         display: flex;
         justify-content: space-between;
+        align-items: baseline;
+        font-size: 13px;
         span:first-child {
-          font-weight: bold;
+          font-weight: 600;
+        }
+        span:last-child {
+          font-size: 12px;
+          color: var(--secondary-text-color);
         }
       }
 
@@ -348,11 +364,18 @@ const handleDelete = () => {
           align-self: center;
         }
         background: var(--light-ill);
-        padding: 5px 7px;
-        border-radius: 4px;
+        border: 1px solid transparent;
+        padding: 7px 10px;
+        border-radius: 7px;
         align-self: start;
         display: grid;
         grid-template-columns: auto 1fr auto auto;
+        transition: background 0.15s ease, border-color 0.15s ease;
+
+        &:hover {
+          background: var(--mail-hover);
+          border-color: var(--light-border-color);
+        }
         .att-icon {
           display: grid;
         }
@@ -395,43 +418,67 @@ const handleDelete = () => {
     .email-info {
 
       border-bottom: 1px solid var(--light-border-color);
-      margin-bottom: 20px;
-      padding-bottom: 8px;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
       @media (max-width: 1024px) {
-        margin-bottom: 15px;
+        margin-bottom: 16px;
       }
+
+      > div:first-child {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 18px;
+        align-items: start;
+      }
+
       .date {
-        color: var(--regular-text-color);
-        margin-bottom: 6px;
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        color: var(--secondary-text-color);
+        font-size: 12.5px;
+        white-space: nowrap;
+        padding-top: 1px;
       }
 
       .email-msg {
         max-width: 400px;
         width: fit-content;
-        margin-bottom: 15px;
+        margin-top: 10px;
+        margin-bottom: 4px;
       }
 
       .send {
         display: flex;
-        margin-bottom: 6px;
+        align-items: baseline;
+        margin-bottom: 5px;
+        min-width: 0;
 
         .send-name {
           color: var(--regular-text-color);
           display: flex;
           flex-wrap: wrap;
+          align-items: baseline;
+          gap: 6px;
+          min-width: 0;
+          font-size: 13px;
         }
 
         .send-name-title {
-          padding-right: 5px;
+          color: var(--el-text-color-primary);
+          font-weight: 600;
+          font-size: 14px;
         }
       }
 
       .receive {
-        margin-bottom: 6px;
+        margin-bottom: 4px;
         display: flex;
+        align-items: baseline;
+        min-width: 0;
         .receive-email {
           max-width: 700px;
           word-break: break-word;
+          font-size: 13px;
         }
         span:nth-child(2) {
           color: var(--regular-text-color);
@@ -440,14 +487,20 @@ const handleDelete = () => {
 
       .send-source {
         white-space: nowrap;
-        font-weight: bold;
-        padding-right: 10px;
+        font-weight: 500;
+        font-size: 12px;
+        color: var(--secondary-text-color);
+        padding-right: 12px;
+        min-width: 3.9em;
       }
 
       .source {
         white-space: nowrap;
-        font-weight: bold;
-        padding-right: 10px;
+        font-weight: 500;
+        font-size: 12px;
+        color: var(--secondary-text-color);
+        padding-right: 12px;
+        min-width: 3.9em;
       }
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="account-box">
+  <div class="account-box" :class="{ 'panel-mode': panel }">
     <div class="head-opt">
       <Icon v-perm="'account:add'" class="icon add" icon="ion:add-outline" width="23" height="23" @click="add"/>
       <Icon class="icon refresh" icon="ion:reload" width="18" height="18" @click="refresh"/>
@@ -13,15 +13,15 @@
           </div>
           <div class="opt">
             <div class="send-email" @click.stop>
-              <Icon @click="setAllReceive(item)" v-if="!item.allReceive" icon="eva:email-fill" width="22" height="22" color="#fccb1a"/>
-              <Icon @click="setAllReceive(item)" v-else icon="flat-color-icons:folder" width="22" height="22" color="#23c4f1" />
+              <Icon @click="setAllReceive(item)" v-if="!item.allReceive" icon="fluent:mail-24-regular" width="20" height="20"/>
+              <Icon @click="setAllReceive(item)" v-else icon="fluent:folder-mail-24-regular" width="20" height="20" />
             </div>
             <div class="settings" @click.stop>
-              <Icon icon="fluent-color:clipboard-24" width="22" height="22" @click.stop="copyAccount(item.email)"/>
-              <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"
+              <Icon icon="fluent:clipboard-24-regular" width="19" height="19" @click.stop="copyAccount(item.email)"/>
+              <Icon icon="fluent:settings-24-filled" width="19" height="19"
                     v-if="showNullSetting(item)"/>
               <el-dropdown v-else>
-                <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"/>
+                <Icon icon="fluent:settings-24-filled" width="19" height="19"/>
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item v-if="hasPerm('email:send')" @click="openSetName(item)">{{ $t('rename') }}</el-dropdown-item>
@@ -142,12 +142,22 @@ import {useSettingStore} from "@/store/setting.js";
 import {useAccountStore} from "@/store/account.js";
 import {useEmailStore} from "@/store/email.js";
 import {useUserStore} from "@/store/user.js";
+import {useUiStore} from "@/store/ui.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
 import {AccountAllReceiveEnum} from "@/enums/account-enum.js";
 
+const props = defineProps({
+  // 嵌在左下角浮层里使用时的紧凑模式
+  panel: {
+    type: Boolean,
+    default: false
+  }
+})
+
 const {t} = useI18n();
 const userStore = useUserStore();
+const uiStore = useUiStore();
 const accountStore = useAccountStore();
 const settingStore = useSettingStore();
 const emailStore = useEmailStore();
@@ -343,6 +353,9 @@ function refresh() {
 function changeAccount(account) {
   accountStore.currentAccountId = account.accountId
   accountStore.currentAccount = account
+  if (props.panel) {
+    uiStore.closeAccountPanel()
+  }
 }
 
 function add() {
@@ -411,7 +424,7 @@ function getAccountList() {
     if (list.length < queryParams.size) {
       noLoading.value = true
     }
-    if (accounts.length === 0) {
+    if (accounts.length === 0 && !accountStore.currentAccount?.accountId) {
       accountStore.currentAccount = list[0]
     }
 
@@ -522,7 +535,7 @@ path[fill="#ffdda1"] {
 <style scoped lang="scss">
 .account-box {
 
-  border-right: 1px solid var(--el-border-color) !important;
+  border-right: 1px solid var(--mail-hairline) !important;
   background-color: var(--el-bg-color);
   height: 100%;
   overflow: hidden;
@@ -530,13 +543,20 @@ path[fill="#ffdda1"] {
   .head-opt {
     display: flex;
     align-items: center;
-    height: 38px;
+    height: 44px;
     box-shadow: var(--header-actions-border);
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 4px;
+    color: var(--regular-text-color);
 
     .icon {
       cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .icon:hover {
+      color: var(--el-color-primary);
     }
 
     .refresh {
@@ -554,7 +574,7 @@ path[fill="#ffdda1"] {
 
   .scrollbar {
     width: 100%;
-    height: calc(100% - 38px);
+    height: calc(100% - 44px);
     overflow: auto;
     @media (max-width: 767px) {
       height: calc(100% - 98px);
@@ -583,17 +603,24 @@ path[fill="#ffdda1"] {
 
   .item {
     background-color: var(--el-bg-color);
+    border: 1px solid var(--mail-hairline);
+    box-shadow: none;
     border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 11px;
+    padding: 9px 11px;
+    margin-bottom: 8px;
     margin-left: 10px;
     margin-right: 10px;
     cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      background: var(--mail-hover);
+    }
 
     .account {
       font-weight: 400;
-      font-size: 15px;
-      margin-bottom: 20px;
+      font-size: 13.5px;
+      margin-bottom: 12px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -602,18 +629,25 @@ path[fill="#ffdda1"] {
     .opt {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 12px;
-      color: #888;
+      color: var(--secondary-text-color);
 
       .settings {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
       }
 
       .send-email {
         display: flex;
         align-items: center;
+      }
+
+      .send-email:hover,
+      .settings > *:hover {
+        color: var(--el-color-primary);
+        cursor: pointer;
       }
     }
 
@@ -628,6 +662,40 @@ path[fill="#ffdda1"] {
 
   .item-choose {
     background: var(--choose-account-background);
+    border-color: var(--el-color-primary-light-7);
+  }
+
+  /* 左下角浮层里的紧凑模式 */
+  &.panel-mode {
+    border-right: none !important;
+    height: auto;
+
+    .head-opt {
+      height: 32px;
+      box-shadow: none;
+      padding-left: 2px;
+      padding-right: 2px;
+      margin-bottom: 6px;
+      color: var(--secondary-text-color);
+    }
+
+    .scrollbar {
+      height: min(320px, 46vh);
+    }
+
+    .item {
+      margin-left: 0;
+      margin-right: 0;
+      margin-bottom: 6px;
+    }
+
+    .item:first-child {
+      margin-top: 0;
+    }
+
+    .noLoading {
+      padding: 6px 0;
+    }
   }
 }
 

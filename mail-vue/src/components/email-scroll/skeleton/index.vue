@@ -112,7 +112,7 @@ import {Icon} from "@iconify/vue";
 
 .pc-star {
   display: flex;
-  width: 40px;
+  width: 30px;
 }
 
 :deep(.el-skeleton__item) {

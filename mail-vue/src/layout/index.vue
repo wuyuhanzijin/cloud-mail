@@ -1,9 +1,7 @@
 <template>
   <el-container class="layout">
-    <el-aside
-        class="aside"
-        :class="uiStore.asideShow ? 'aside-show' : 'el-aside-hide'">
-      <Aside />
+    <el-aside class="aside" :class="asideClass">
+      <Aside :collapsed="asideCollapsed" />
     </el-aside>
     <div
         :class="(uiStore.asideShow && isMobile)? 'overlay-show':'overlay-hide'"
@@ -17,6 +15,13 @@
         <Main />
       </el-main>
     </el-container>
+
+    <!-- 左下角展开的多邮箱面板 -->
+    <div v-if="uiStore.accountPanel" class="account-layer" @click.self="uiStore.closeAccountPanel()">
+      <div class="account-panel">
+        <account panel />
+      </div>
+    </div>
   </el-container>
   <writer ref="writerRef" />
 </template>
@@ -25,7 +30,8 @@
 import Aside from '@/layout/aside/index.vue'
 import Header from '@/layout/header/index.vue'
 import Main from '@/layout/main/index.vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import account from '@/layout/account/index.vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import {useUiStore} from "@/store/ui.js";
 import writer from '@/layout/write/index.vue'
 
@@ -35,7 +41,20 @@ const isMobile = ref(window.innerWidth < 1025)
 const handleResize = () => {
   isMobile.value = window.innerWidth < 1025
   uiStore.asideShow = window.innerWidth > 1024;
+  if (!isMobile.value) {
+    uiStore.closeAccountPanel()
+  }
 }
+
+// 窄屏走抽屉，宽屏走「收起成图标栏」
+const asideCollapsed = computed(() => !isMobile.value && uiStore.asideCollapse)
+
+const asideClass = computed(() => {
+  if (isMobile.value) {
+    return uiStore.asideShow ? 'aside-show' : 'el-aside-hide'
+  }
+  return asideCollapsed.value ? 'aside-show aside-rail' : 'aside-show'
+})
 
 onMounted(() => {
   uiStore.writerRef = writerRef
@@ -60,8 +79,9 @@ onBeforeUnmount(() => {
 }
 
 .aside-show {
-  -webkit-box-shadow: var(--aside-right-border);
-  box-shadow: var(--aside-right-border);
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-right: 1px solid var(--mail-hairline);
   transform: translateX(0);
   transition: all 100ms ease;
   z-index: 101;
@@ -102,8 +122,9 @@ onBeforeUnmount(() => {
 
 .el-header {
   background: var(--el-bg-color);
-  border-bottom: solid 1px var(--el-border-color);
-  padding: 0 0 0 0;
+  border-bottom: solid 1px var(--mail-hairline);
+  height: 56px;
+  padding: 0 16px 0 10px;
 }
 
 .overlay-show {
@@ -121,5 +142,42 @@ onBeforeUnmount(() => {
   display: flex;
   pointer-events: none;
   opacity: 0;
+}
+
+/* 收起为图标栏 */
+.aside-rail {
+  width: 64px;
+}
+
+/* 左下角的多邮箱浮层 */
+.account-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+}
+
+.account-panel {
+  position: absolute;
+  left: 12px;
+  bottom: 74px;
+  width: 292px;
+  padding: 10px;
+  background: var(--el-bg-color);
+  border: 1px solid var(--mail-hairline);
+  border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  animation: account-panel-in 140ms ease-out;
+}
+
+@keyframes account-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

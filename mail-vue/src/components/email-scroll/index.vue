@@ -22,8 +22,6 @@
 
       <div class="header-right">
         <span class="email-count" v-if="total">{{ $t('emailCount', {total: total}) }}</span>
-        <Icon v-if="showAccountIcon" class="more-icon icon" width="16" height="16" icon="akar-icons:dot-grid-fill"
-              @click="changeAccountShow"/>
       </div>
     </div>
 
@@ -398,9 +396,9 @@ const list = computed(() => {
 
 const itemHeight = computed(() => {
     if (props.type === 'all-email') {
-      return isMobile.value ? 132 : 65;
+      return isMobile.value ? 136 : 72;
     } else  {
-      return isMobile.value ? 83 : 48;
+      return isMobile.value ? 88 : 56;
     }
 })
 
@@ -583,10 +581,6 @@ function starChange(email) {
       email.isStar = 1;
     })
   }
-}
-
-function changeAccountShow() {
-  uiStore.accountShow = !uiStore.accountShow;
 }
 
 const handleRead = () => {
@@ -970,16 +964,16 @@ function loadData() {
 
 :deep(.email-row) {
   display: flex;
-  padding: 8px 0;
+  padding: 0 14px 0 0;
   justify-content: space-between;
   box-shadow: var(--header-actions-border);
   cursor: pointer;
   align-items: center;
   position: relative;
-  transition: background 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  height: 48px;
+  transition: background 0.12s ease;
+  height: 56px;
   @media (max-width: 1366px) {
-    height: 83px;
+    height: 88px;
   }
 
   @media (pointer: coarse) {
@@ -987,9 +981,9 @@ function loadData() {
     user-select: none;
   }
   &.all-email {
-    height: 65px;
+    height: 72px;
     @media (max-width: 1366px) {
-      height: 132px;
+      height: 136px;
     }
   }
   .user-info {
@@ -1030,15 +1024,15 @@ function loadData() {
 
   .checkbox {
     display: flex;
-    padding-left: 15px;
-    padding-right: 20px;
+    padding-left: 18px;
+    padding-right: 4px;
     justify-content: center;
   }
 
   .all-email-checkbox {
     display: flex;
-    padding-left: 15px;
-    padding-right: 20px;
+    padding-left: 18px;
+    padding-right: 4px;
     justify-content: center;
     @media (min-width: 1367px) {
       justify-content: start;
@@ -1058,7 +1052,8 @@ function loadData() {
   .title {
     flex: 1;
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 190px 1fr;
+    column-gap: 12px;
     @media (max-width: 1366px) {
       padding-right: 15px;
     }
@@ -1069,6 +1064,7 @@ function loadData() {
 
     .email-sender {
       color: var(--el-text-color-primary);
+      font-size: 14px;
       display: grid;
       grid-template-columns: auto 1fr auto;
 
@@ -1191,6 +1187,7 @@ function loadData() {
         white-space: nowrap;
         text-overflow: ellipsis;
         padding-left: 10px;
+        font-size: 13px;
         color: var(--email-scroll-content-color);
         @media (max-width: 1366px) {
           padding-left: 0;
@@ -1206,8 +1203,11 @@ function loadData() {
     font-size: 12px;
     white-space: nowrap;
     display: flex;
-    padding-left: 15px;
+    padding-left: 12px;
+    min-width: 76px;
+    justify-content: flex-end;
     align-items: center;
+    color: var(--secondary-text-color);
     @media (max-width: 1366px) {
       display: none;
     }
@@ -1241,7 +1241,8 @@ function loadData() {
 
 .pc-star {
   display: flex;
-  width: 40px;
+  width: 30px;
+  color: var(--dark-border);
 }
 
 @media (max-width: 1366px) {
@@ -1271,16 +1272,18 @@ function loadData() {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 15px;
-  padding: 3px 15px;
+  gap: 12px;
+  height: 44px;
+  padding: 0 14px 0 18px;
   box-shadow: var(--header-actions-border);
+  color: var(--regular-text-color);
 
   .header-left {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     position: relative;
-    column-gap: 20px;
+    column-gap: 16px;
     row-gap: 8px;
     padding-left: 2px;
     color: var(--el-text-color-primary);;
@@ -1288,25 +1291,31 @@ function loadData() {
 
   .header-right {
     display: grid;
-    grid-template-columns: auto auto;
-    align-items: start;
+    grid-template-columns: auto;
+    align-items: center;
     height: 100%;
     color: var(--el-text-color-primary);;
 
     .email-count {
       white-space: nowrap;
-      margin-top: 6px;
+      font-size: 12px;
+      color: var(--secondary-text-color);
     }
   }
 
   .icon {
     font-size: 18px;
     cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  .icon:hover {
+    color: var(--el-color-primary);
   }
 
   .more-icon {
-    margin-top: 8px;
-    margin-left: 15px;
+    margin-left: 14px;
+    color: var(--regular-text-color);
   }
 }
 
