@@ -1,69 +1,85 @@
 <template>
   <div class="account-box" :class="{ 'panel-mode': panel }">
     <div class="head-opt">
-      <Icon v-perm="'account:add'" class="icon add" icon="ion:add-outline" width="23" height="23" @click="add"/>
-      <Icon class="icon refresh" icon="ion:reload" width="18" height="18" @click="refresh"/>
+      <span class="head-title" v-if="panel">{{ $t('account') }}</span>
+      <div class="head-actions">
+        <button v-perm="'account:add'" type="button" class="icon-btn" @click="add">
+          <Icon icon="ion:add-outline" width="18" height="18"/>
+        </button>
+        <button type="button" class="icon-btn" @click="refresh">
+          <Icon icon="ion:reload" width="17" height="17"/>
+        </button>
+      </div>
     </div>
     <el-scrollbar class="scrollbar" ref="scrollbarRef">
       <div v-infinite-scroll="getAccountList" :infinite-scroll-distance="600" :infinite-scroll-immediate="false">
-        <el-card class="item" :class="itemBg(item.accountId)" v-for="(item, index) in accounts" :key="item.accountId"
-                 @click="changeAccount(item)">
-          <div class="account">
-            {{ item.email }}
-          </div>
-          <div class="opt">
-            <div class="send-email" @click.stop>
-              <Icon @click="setAllReceive(item)" v-if="!item.allReceive" icon="fluent:mail-24-regular" width="20" height="20"/>
-              <Icon @click="setAllReceive(item)" v-else icon="fluent:folder-mail-24-regular" width="20" height="20" />
-            </div>
-            <div class="settings" @click.stop>
-              <Icon icon="fluent:clipboard-24-regular" width="19" height="19" @click.stop="copyAccount(item.email)"/>
-              <Icon icon="fluent:settings-24-filled" width="19" height="19"
-                    v-if="showNullSetting(item)"/>
-              <el-dropdown v-else>
-                <Icon icon="fluent:settings-24-filled" width="19" height="19"/>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item v-if="hasPerm('email:send')" @click="openSetName(item)">{{ $t('rename') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId" @click="setAsTop(item, index)">{{ $t('pin') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')"
-                                      @click="remove(item)">{{ $t('delete') }}
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-          </div>
-        </el-card>
+        <div class="acct-item"
+             :class="{ active: accountStore.currentAccountId === item.accountId }"
+             v-for="(item, index) in accounts" :key="item.accountId"
+             @click="changeAccount(item)">
+          <span class="acct-avatar">{{ avatarInitial(item.email) }}</span>
+          <span class="acct-meta">
+            <span class="acct-email">{{ item.email }}</span>
+            <span class="acct-sub" v-if="item.name">{{ item.name }}</span>
+          </span>
+          <span class="acct-actions" @click.stop>
+            <button type="button" class="icon-btn" :class="{ 'is-on': item.allReceive }"
+                    @click="setAllReceive(item)">
+              <Icon v-if="!item.allReceive" icon="fluent:mail-24-regular" width="17" height="17"/>
+              <Icon v-else icon="fluent:folder-mail-24-regular" width="17" height="17"/>
+            </button>
+            <button type="button" class="icon-btn" @click="copyAccount(item.email)">
+              <Icon icon="fluent:clipboard-24-regular" width="17" height="17"/>
+            </button>
+            <el-dropdown v-if="!showNullSetting(item)" trigger="click" placement="bottom-end">
+              <button type="button" class="icon-btn">
+                <Icon icon="material-symbols-light:more-vert" width="18" height="18"/>
+              </button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item v-if="hasPerm('email:send')" @click="openSetName(item)">{{ $t('rename') }}</el-dropdown-item>
+                  <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId" @click="setAsTop(item, index)">{{ $t('pin') }}</el-dropdown-item>
+                  <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')"
+                                    @click="remove(item)">{{ $t('delete') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </span>
+        </div>
 
         <!-- Initial Loading Skeleton -->
         <template v-if="loading">
-          <el-skeleton v-for="i in skeletonRows" :key="i" animated>
-            <template #template>
-              <el-card class="item">
-                <el-skeleton-item variant="p" style="width: 70%; height: 20px; margin-bottom: 25px"/>
-                <div style="display: flex; justify-content: space-between">
-                  <el-skeleton-item variant="text" style="width: 20px"/>
-                  <el-skeleton-item variant="text" style="width: 20px"/>
+          <div class="acct-item is-skeleton" v-for="i in skeletonRows" :key="i">
+            <el-skeleton animated>
+              <template #template>
+                <div class="skeleton-row">
+                  <el-skeleton-item variant="circle" style="width: 32px; height: 32px"/>
+                  <div class="skeleton-lines">
+                    <el-skeleton-item variant="text" style="width: 70%"/>
+                    <el-skeleton-item variant="text" style="width: 40%"/>
+                  </div>
                 </div>
-              </el-card>
-            </template>
-          </el-skeleton>
+              </template>
+            </el-skeleton>
+          </div>
         </template>
 
         <!-- Follow Loading Skeleton -->
         <template v-if="accounts.length > 0 && !noLoading">
-          <el-skeleton animated>
-            <template #template>
-              <el-card class="item">
-                <el-skeleton-item variant="p" style="width: 70%; height: 20px; margin-bottom: 20px"/>
-                <div style="display: flex; justify-content: space-between">
-                  <el-skeleton-item variant="text" style="width: 20px"/>
-                  <el-skeleton-item variant="text" style="width: 20px"/>
+          <div class="acct-item is-skeleton">
+            <el-skeleton animated>
+              <template #template>
+                <div class="skeleton-row">
+                  <el-skeleton-item variant="circle" style="width: 32px; height: 32px"/>
+                  <div class="skeleton-lines">
+                    <el-skeleton-item variant="text" style="width: 70%"/>
+                    <el-skeleton-item variant="text" style="width: 40%"/>
+                  </div>
                 </div>
-              </el-card>
-            </template>
-          </el-skeleton>
+              </template>
+            </el-skeleton>
+          </div>
         </template>
 
         <div class="noLoading" v-if="noLoading && accounts.length > 0">
@@ -114,14 +130,18 @@
         <span style="font-size: 12px;color: #F56C6C" v-if="botJsError">{{ $t('verifyModuleFailed') }}</span>
       </div>
     </el-dialog>
-    <el-dialog v-model="setNameShow" :title="$t('changeUserName')">
-      <div class="container">
-        <el-input v-model="accountName" type="text" :placeholder="$t('username')" autocomplete="off" @keyup.enter="setName">
-        </el-input>
-        <el-button class="btn" type="primary" @click="setName" :loading="setNameLoading"
-        >{{ $t('save') }}
-        </el-button>
+    <el-dialog v-model="setNameShow" :title="$t('changeUserName')" width="380px" align-center class="acct-dialog">
+      <div class="dialog-body">
+        <label class="dialog-label">{{ $t('username') }}</label>
+        <el-input v-model="accountName" type="text" :placeholder="$t('username')" autocomplete="off"
+                  size="large" @keyup.enter="setName"/>
       </div>
+      <template #footer>
+        <el-button text @click="setNameShow = false">{{ $t('cancel') }}</el-button>
+        <el-button type="primary" class="dialog-submit" :loading="setNameLoading" @click="setName">
+          {{ $t('save') }}
+        </el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -143,6 +163,7 @@ import {useAccountStore} from "@/store/account.js";
 import {useEmailStore} from "@/store/email.js";
 import {useUserStore} from "@/store/user.js";
 import {useUiStore} from "@/store/ui.js";
+import {avatarInitial} from "@/utils/avatar.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
 import {AccountAllReceiveEnum} from "@/enums/account-enum.js";
@@ -543,32 +564,46 @@ path[fill="#ffdda1"] {
   .head-opt {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 6px;
     height: 44px;
+    padding: 0 10px 0 14px;
     box-shadow: var(--header-actions-border);
-    padding-left: 12px;
-    padding-right: 12px;
-    gap: 4px;
-    color: var(--regular-text-color);
 
-    .icon {
-      cursor: pointer;
-      transition: color 0.15s ease;
+    .head-title {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--secondary-text-color);
     }
 
-    .icon:hover {
+    .head-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: auto;
+    }
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+
+    &:hover {
+      background: var(--mail-nav-hover);
+      color: var(--el-text-color-primary);
+    }
+
+    &.is-on {
       color: var(--el-color-primary);
-    }
-
-    .refresh {
-      margin-left: 10px;
-    }
-
-    .add {
-      margin-left: 2px;
-    }
-
-    .head-opt:not(.add) .refresh {
-      margin-left: 5px;
     }
   }
 
@@ -596,73 +631,134 @@ path[fill="#ffdda1"] {
     }
   }
 
+  /* 账号行：头像 + 邮箱 / 备注，操作按钮只在悬停时出现 */
+  .acct-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 8px 2px;
+    padding: 8px 8px 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+
+    &:hover {
+      background: var(--mail-nav-hover);
+    }
+
+    &.active {
+      background: var(--choose-account-background);
+    }
+
+    &.is-skeleton {
+      cursor: default;
+      pointer-events: none;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+
+  .acct-avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--el-color-primary-light-8);
+    color: var(--el-color-primary);
+    user-select: none;
+  }
+
+  .acct-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.4;
+  }
+
+  .acct-email {
+    font-size: 13px;
+    color: var(--el-text-color-primary);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .acct-sub {
+    font-size: 11.5px;
+    color: var(--secondary-text-color);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .acct-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+
+    .icon-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+    }
+  }
+
+  .acct-item:hover .acct-actions,
+  .acct-item.active .acct-actions {
+    opacity: 1;
+  }
+
+  /* 触屏没有悬停，直接常显 */
+  @media (hover: none) {
+    .acct-actions {
+      opacity: 1;
+    }
+  }
+
+  .skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   .btn {
     width: 100%;
     margin-top: 15px;
   }
 
-  .item {
-    background-color: var(--el-bg-color);
-    border: 1px solid var(--mail-hairline);
-    box-shadow: none;
-    border-radius: 8px;
-    padding: 9px 11px;
-    margin-bottom: 8px;
-    margin-left: 10px;
-    margin-right: 10px;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-
-    &:hover {
-      background: var(--mail-hover);
-    }
-
-    .account {
-      font-weight: 400;
-      font-size: 13.5px;
-      margin-bottom: 12px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    .opt {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: var(--secondary-text-color);
-
-      .settings {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .send-email {
-        display: flex;
-        align-items: center;
-      }
-
-      .send-email:hover,
-      .settings > *:hover {
-        color: var(--el-color-primary);
-        cursor: pointer;
-      }
-    }
-
-    :deep(.el-card__body) {
-      padding: 0;
-    }
+  .dialog-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .item:first-child {
-    margin-top: 10px;
+  .dialog-label {
+    font-size: 12.5px;
+    color: var(--secondary-text-color);
   }
 
-  .item-choose {
-    background: var(--choose-account-background);
-    border-color: var(--el-color-primary-light-7);
+  .dialog-submit {
+    border-radius: 999px;
+    padding-left: 22px;
+    padding-right: 22px;
   }
 
   /* 左下角浮层里的紧凑模式 */
@@ -671,26 +767,19 @@ path[fill="#ffdda1"] {
     height: auto;
 
     .head-opt {
-      height: 32px;
+      height: 34px;
       box-shadow: none;
-      padding-left: 2px;
-      padding-right: 2px;
-      margin-bottom: 6px;
-      color: var(--secondary-text-color);
+      padding: 0 2px 0 4px;
+      margin-bottom: 4px;
     }
 
     .scrollbar {
       height: min(320px, 46vh);
     }
 
-    .item {
+    .acct-item {
       margin-left: 0;
       margin-right: 0;
-      margin-bottom: 6px;
-    }
-
-    .item:first-child {
-      margin-top: 0;
     }
 
     .noLoading {
@@ -698,6 +787,7 @@ path[fill="#ffdda1"] {
     }
   }
 }
+
 
 
 .setting-icon {
@@ -713,11 +803,44 @@ path[fill="#ffdda1"] {
 
 :deep(.el-dialog) {
   width: 400px !important;
+  border-radius: 14px;
+  padding: 24px 24px 20px;
+  box-shadow: 0 16px 48px rgba(16, 24, 40, 0.18), 0 2px 8px rgba(16, 24, 40, 0.06);
   @media (max-width: 440px) {
     width: calc(100% - 40px) !important;
     margin-right: 20px !important;
     margin-left: 20px !important;
   }
+}
+
+:deep(.el-dialog__header) {
+  padding: 0;
+  margin-right: 0;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--el-text-color-primary);
+}
+
+:deep(.el-dialog__body) {
+  padding: 12px 0 4px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 16px 0 0;
+}
+
+:deep(.el-dialog__footer .el-button) {
+  border-radius: 999px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 10px;
 }
 
 .select {

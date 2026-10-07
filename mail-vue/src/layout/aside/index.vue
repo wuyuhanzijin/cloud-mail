@@ -52,6 +52,7 @@ import {useSettingStore} from "@/store/setting.js";
 import {useUiStore} from "@/store/ui.js";
 import {useAccountStore} from "@/store/account.js";
 import {useUserStore} from "@/store/user.js";
+import {useWriterStore} from "@/store/writer.js";
 
 defineProps({
   collapsed: {
@@ -64,6 +65,7 @@ const settingStore = useSettingStore();
 const uiStore = useUiStore();
 const accountStore = useAccountStore();
 const userStore = useUserStore();
+const writerStore = useWriterStore();
 const route = useRoute();
 
 const NAV_ITEMS = [
@@ -91,7 +93,8 @@ const accountInitial = computed(() => {
 })
 
 function openWrite() {
-  uiStore.writerRef?.open()
+  writerStore.startNew()
+  router.push({name: 'compose'})
 }
 
 </script>

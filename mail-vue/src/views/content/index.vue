@@ -94,10 +94,12 @@ import {avatarInitial, avatarTone} from "@/utils/avatar.js";
 import {useSettingStore} from "@/store/setting.js";
 import {allEmailDelete} from "@/request/all-email.js";
 import {useUiStore} from "@/store/ui.js";
+import {useWriterStore} from "@/store/writer.js";
 import {useI18n} from "vue-i18n";
 import {EmailUnreadEnum} from "@/enums/email-enum.js";
 
 const uiStore = useUiStore();
+const writerStore = useWriterStore();
 const settingStore = useSettingStore();
 const accountStore = useAccountStore();
 const emailStore = useEmailStore();
@@ -176,11 +178,13 @@ function handleKeyDown(event) {
 }
 
 function openReply() {
-  uiStore.writerRef.openReply(email.value)
+  writerStore.startReply(email.value)
+  router.push({name: 'compose'})
 }
 
 function openForward() {
-  uiStore.writerRef.openForward(email.value)
+  writerStore.startForward(email.value)
+  router.push({name: 'compose'})
 }
 
 function toMessage(message) {

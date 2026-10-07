@@ -23,7 +23,6 @@
       </div>
     </div>
   </el-container>
-  <writer ref="writerRef" />
 </template>
 
 <script setup>
@@ -33,10 +32,8 @@ import Main from '@/layout/main/index.vue'
 import account from '@/layout/account/index.vue'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import {useUiStore} from "@/store/ui.js";
-import writer from '@/layout/write/index.vue'
 
 const uiStore = useUiStore();
-const writerRef = ref({})
 const isMobile = ref(window.innerWidth < 1025)
 const handleResize = () => {
   isMobile.value = window.innerWidth < 1025
@@ -57,8 +54,6 @@ const asideClass = computed(() => {
 })
 
 onMounted(() => {
-  uiStore.writerRef = writerRef
-
   window.addEventListener('resize', handleResize)
   handleResize()
 })
@@ -160,7 +155,7 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 12px;
   bottom: 74px;
-  width: 292px;
+  width: 320px;
   padding: 10px;
   background: var(--el-bg-color);
   border: 1px solid var(--mail-hairline);

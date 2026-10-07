@@ -32,6 +32,16 @@ const routes = [
                 }
             },
             {
+                path: '/compose',
+                name: 'compose',
+                component: () => import('@/views/compose/index.vue'),
+                meta: {
+                    title: 'compose',
+                    name: 'compose',
+                    menu: false
+                }
+            },
+            {
                 path: '/settings',
                 name: 'setting',
                 component: () => import('@/views/setting/index.vue'),

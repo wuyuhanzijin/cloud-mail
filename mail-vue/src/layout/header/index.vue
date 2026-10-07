@@ -45,43 +45,51 @@
         </div>
         <template #dropdown>
           <div class="user-details">
-            <div class="details-avatar">
-              {{ formatName(userStore.user.email) }}
-            </div>
-            <div class="user-name">
-              {{ userStore.user.name }}
-            </div>
-            <div class="detail-email" @click="copyEmail(userStore.user.email)">
-              {{ userStore.user.email }}
-            </div>
-            <div class="detail-user-type">
-              <el-tag>{{ userStore.user.role.name }}</el-tag>
-            </div>
-            <div class="action-info">
-              <div>
-                <span style="margin-right: 10px">{{ $t('sendCount') }}</span>
-                <span style="margin-right: 10px">{{ $t('accountCount') }}</span>
-              </div>
-              <div>
-                <div>
-                  <span v-if="sendCount" style="margin-right: 5px">{{ sendCount }}</span>
-                  <el-tag v-if="!hasPerm('email:send')">{{ sendType }}</el-tag>
-                  <el-tag v-else>{{ sendType }}</el-tag>
+            <div class="card-head">
+              <div class="card-avatar">{{ formatName(userStore.user.email) }}</div>
+              <div class="card-id">
+                <div class="card-name">{{ userStore.user.name }}</div>
+                <div class="card-email" @click="copyEmail(userStore.user.email)">
+                  {{ userStore.user.email }}
                 </div>
-                <div>
-                  <el-tag v-if="settingStore.settings.manyEmail || settingStore.settings.addEmail">
+              </div>
+            </div>
+            <div class="card-rows">
+              <div class="card-row">
+                <span class="row-label">{{ $t('quotaSend') }}</span>
+                <span class="row-value">
+                  <span v-if="sendCount" class="row-num">{{ sendCount }}</span>
+                  <el-tag size="small" effect="plain">{{ sendType }}</el-tag>
+                </span>
+              </div>
+              <div class="card-row">
+                <span class="row-label">{{ $t('quotaAccount') }}</span>
+                <span class="row-value">
+                  <el-tag v-if="settingStore.settings.manyEmail || settingStore.settings.addEmail" size="small" effect="plain">
                     {{ $t('disabled') }}
                   </el-tag>
-                  <span v-else-if="accountCount && hasPerm('account:add')"
-                        style="margin-right: 5px">{{ $t('totalUserAccount', {msg: accountCount}) }}</span>
-                  <el-tag v-else-if="!accountCount && hasPerm('account:add')">{{ $t('unlimited') }}</el-tag>
-                  <el-tag v-else-if="!hasPerm('account:add')">{{ $t('unauthorized') }}</el-tag>
-                </div>
+                  <span v-else-if="accountCount && hasPerm('account:add')" class="row-num">
+                    {{ $t('totalUserAccount', {msg: accountCount}) }}
+                  </span>
+                  <el-tag v-else-if="!accountCount && hasPerm('account:add')" size="small" effect="plain">
+                    {{ $t('unlimited') }}
+                  </el-tag>
+                  <el-tag v-else-if="!hasPerm('account:add')" size="small" effect="plain">
+                    {{ $t('unauthorized') }}
+                  </el-tag>
+                </span>
+              </div>
+              <div class="card-row">
+                <span class="row-label">{{ $t('quotaRole') }}</span>
+                <span class="row-value">
+                  <el-tag size="small" effect="plain">{{ userStore.user.role.name }}</el-tag>
+                </span>
               </div>
             </div>
-            <div class="logout">
-              <el-button type="primary" :loading="logoutLoading" @click="clickLogout">{{ $t('logOut') }}</el-button>
-            </div>
+            <button type="button" class="card-action" :disabled="logoutLoading" @click="clickLogout">
+              <Icon icon="fluent:arrow-exit-20-regular" width="18" height="18"/>
+              <span>{{ $t('logOut') }}</span>
+            </button>
           </div>
         </template>
       </el-dropdown>
@@ -102,12 +110,14 @@ import {useSettingStore} from "@/store/setting.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
 import {setExtend} from "@/utils/day.js"
+import {useWriterStore} from "@/store/writer.js"
 
 const {t} = useI18n();
 const route = useRoute();
 const settingStore = useSettingStore();
 const userStore = useUserStore();
 const uiStore = useUiStore();
+const writerStore = useWriterStore();
 const logoutLoading = ref(false)
 const userInfoShow = ref(false)
 const userinfoRef = ref({})
@@ -267,7 +277,8 @@ function switchDark(nextIsDark, root) {
 }
 
 function openSend() {
-  uiStore.writerRef.open()
+  writerStore.startNew()
+  router.push({name: 'compose'})
 }
 
 function changeAside() {
@@ -306,90 +317,115 @@ function formatName(email) {
 }
 
 .user-details {
-  width: 250px;
-  font-size: 14px;
-  display: grid;
-  grid-template-columns: 1fr;
-  justify-items: center;
+  width: 288px;
+  padding: 6px 0 0;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
 
-  .user-name {
-    font-weight: bold;
-    margin-top: 10px;
-    padding-left: 20px;
-    padding-right: 20px;
-    width: 250px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    text-align: center;
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px 16px;
   }
 
-  .detail-user-type {
-    margin-top: 10px;
-  }
-
-  .action-info {
-    width: 100%;
-    display: grid;
-    grid-template-columns: auto auto;
-    margin-top: 10px;
-
-    > div:first-child {
-      display: grid;
-      align-items: center;
-      gap: 10px;
-    }
-
-    > div:last-child {
-      display: grid;
-      gap: 10px;
-      text-align: center;
-
-      > div {
-        display: flex;
-        align-items: center;
-      }
-    }
-  }
-
-  .detail-email {
-    padding-left: 20px;
-    padding-right: 20px;
-    width: 250px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    text-align: center;
-    color: var(--regular-text-color);
-    cursor: pointer;
-  }
-
-  .logout {
-    margin-top: 20px;
-    width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
-
-    .el-button {
-      border-radius: 6px;
-      height: 28px;
-      width: 100%;
-    }
-  }
-
-  .details-avatar {
-    margin-top: 20px;
-    height: 40px;
-    width: 40px;
-    background: var(--el-bg-color);
-    color: var(--el-text-color-primary);
-    border: 1px solid var(--dark-border);
-    font-size: 18px;
+  .card-avatar {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--el-color-primary);
+    user-select: none;
+  }
+
+  .card-id {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .card-email {
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &:hover {
+      color: var(--el-color-primary);
+    }
+  }
+
+  .card-rows {
+    padding: 4px 16px 10px;
+    border-top: 1px solid var(--mail-hairline);
+  }
+
+  .card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 32px;
+  }
+
+  .row-label {
+    color: var(--secondary-text-color);
+    white-space: nowrap;
+  }
+
+  .row-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: var(--el-text-color-primary);
+    text-align: right;
+  }
+
+  .row-num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 16px;
+    border-top: 1px solid var(--mail-hairline);
+    color: var(--el-text-color-regular);
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s ease, color 0.12s ease;
+
+    &:hover {
+      background: var(--mail-nav-hover);
+      color: var(--el-text-color-primary);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
   }
 }
 

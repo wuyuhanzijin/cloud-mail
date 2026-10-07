@@ -239,6 +239,8 @@ import {Icon} from "@iconify/vue";
 import skeletonBlock from "@/components/email-scroll/skeleton/index.vue"
 import {computed, onActivated, reactive, ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import {useEmailStore} from "@/store/email.js";
+import {useWriterStore} from "@/store/writer.js";
+import router from "@/router/index.js";
 import {useUiStore} from "@/store/ui.js";
 import {useSettingStore} from "@/store/setting.js";
 import {sleep} from "@/utils/time-utils.js"
@@ -304,6 +306,7 @@ const {t} = useI18n()
 const settingStore = useSettingStore()
 const uiStore = useUiStore();
 const emailStore = useEmailStore();
+const writerStore = useWriterStore();
 const loading = ref(false);
 const followLoading = ref(false);
 const noLoading = ref(false);
@@ -493,13 +496,15 @@ window.addEventListener('wheel', (event) => {
 function openReply(email) {
   const fullEmail = emailStore.detailMap[email.emailId]
   if (!fullEmail) return
-  uiStore.writerRef.openReply(fullEmail)
+  writerStore.startReply(fullEmail)
+  router.push({name: 'compose'})
 }
 
 function openForward(email) {
   const fullEmail = emailStore.detailMap[email.emailId]
   if (!fullEmail) return
-  uiStore.writerRef.openForward(fullEmail)
+  writerStore.startForward(fullEmail)
+  router.push({name: 'compose'})
 }
 
 function visibleChange(e) {
