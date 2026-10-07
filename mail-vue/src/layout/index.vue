@@ -13,6 +13,11 @@
             <Header />
         </el-header>
         <Main />
+
+        <!-- 写信：铺满内容区，不用另开路由 -->
+        <div v-if="writerStore.open" class="compose-layer">
+          <writer />
+        </div>
       </el-main>
     </el-container>
 
@@ -30,10 +35,13 @@ import Aside from '@/layout/aside/index.vue'
 import Header from '@/layout/header/index.vue'
 import Main from '@/layout/main/index.vue'
 import account from '@/layout/account/index.vue'
+import writer from '@/layout/write/index.vue'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import {useUiStore} from "@/store/ui.js";
+import {useWriterStore} from "@/store/writer.js";
 
 const uiStore = useUiStore();
+const writerStore = useWriterStore();
 const isMobile = ref(window.innerWidth < 1025)
 const handleResize = () => {
   isMobile.value = window.innerWidth < 1025
@@ -113,6 +121,19 @@ onBeforeUnmount(() => {
 
 .el-main {
   padding: 0;
+  position: relative;
+}
+
+/* 写信面板：铺满主内容区（含顶栏），侧边栏保留 */
+.compose-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  background: var(--el-bg-color);
+  overflow: hidden;
 }
 
 .el-header {

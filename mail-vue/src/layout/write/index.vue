@@ -1,5 +1,5 @@
 <template>
-  <div class="compose-page" v-show="show">
+  <div class="compose-page">
     <div class="compose-head">
       <button type="button" class="head-btn" @click="close">
         <Icon icon="material-symbols-light:arrow-back-ios-new" width="20" height="20"/>
@@ -128,17 +128,29 @@ const emailStore = useEmailStore();
 const accountStore = useAccountStore()
 const editor = ref({})
 const userStore = useUserStore();
-const show = ref(false);
 
-// 写信是一个独立页面，关闭 = 回到来时的页面
+// 写信面板由 writerStore.open 控制挂载，关闭即卸载
 function leaveCompose() {
-  show.value = false
-  if (router.currentRoute.value.name !== 'compose') return
-  if (router.options.history.state?.back) {
-    router.back()
-  } else {
-    router.replace({name: 'email'})
+  writerStore.closeCompose()
+}
+
+// 挂载时按 intent 初始化内容
+function applyIntent() {
+  const payload = writerStore.intentPayload
+  switch (writerStore.intent) {
+    case 'reply':
+      openReply(payload)
+      break
+    case 'forward':
+      openForward(payload)
+      break
+    case 'draft':
+      openDraft(payload)
+      break
+    default:
+      open()
   }
+  writerStore.clearIntent()
 }
 
 const percent = ref(0)
@@ -398,7 +410,6 @@ async function sendEmail() {
       localStorage.removeItem('token');
       router.replace('/login');
     }
-    show.value = true
     addRecipientRecord();
   }).finally(() => {
     percentMessage.close()
@@ -524,7 +535,6 @@ function open() {
     form.accountId = accountStore.currentAccount.accountId;
     form.name = accountStore.currentAccount.name;
   }
-  show.value = true;
   editor.value.focus()
 }
 
@@ -532,7 +542,6 @@ function openDraft(draft) {
   Object.assign(form, {...draft})
   defValue.value = ''
   setTimeout(() => defValue.value = form.content)
-  show.value = true;
   editor.value.focus()
 }
 
@@ -544,6 +553,7 @@ const handleKeyDown = (event) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
+  applyIntent();
 });
 
 onUnmounted(() => {
@@ -727,6 +737,12 @@ function close() {
     min-height: 44px;
     padding: 6px 0;
     border-bottom: 1px solid var(--mail-hairline);
+  }
+
+  /* 收件人前缀要跟「发件人 / 主题」左对齐 */
+  :deep(.el-input-tag__prefix) {
+    padding-left: 0;
+    margin-left: 0;
   }
 
   :deep(.el-input) {

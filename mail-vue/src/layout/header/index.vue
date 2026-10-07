@@ -278,7 +278,6 @@ function switchDark(nextIsDark, root) {
 
 function openSend() {
   writerStore.startNew()
-  router.push({name: 'compose'})
 }
 
 function changeAside() {

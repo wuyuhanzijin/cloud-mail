@@ -94,7 +94,6 @@ const accountInitial = computed(() => {
 
 function openWrite() {
   writerStore.startNew()
-  router.push({name: 'compose'})
 }
 
 </script>

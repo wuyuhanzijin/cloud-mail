@@ -240,7 +240,6 @@ import skeletonBlock from "@/components/email-scroll/skeleton/index.vue"
 import {computed, onActivated, reactive, ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import {useEmailStore} from "@/store/email.js";
 import {useWriterStore} from "@/store/writer.js";
-import router from "@/router/index.js";
 import {useUiStore} from "@/store/ui.js";
 import {useSettingStore} from "@/store/setting.js";
 import {sleep} from "@/utils/time-utils.js"
@@ -497,14 +496,12 @@ function openReply(email) {
   const fullEmail = emailStore.detailMap[email.emailId]
   if (!fullEmail) return
   writerStore.startReply(fullEmail)
-  router.push({name: 'compose'})
 }
 
 function openForward(email) {
   const fullEmail = emailStore.detailMap[email.emailId]
   if (!fullEmail) return
   writerStore.startForward(fullEmail)
-  router.push({name: 'compose'})
 }
 
 function visibleChange(e) {

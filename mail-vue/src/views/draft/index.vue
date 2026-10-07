@@ -31,7 +31,6 @@ import {useUiStore} from "@/store/ui.js";
 import {useWriterStore} from "@/store/writer.js";
 import {userDraftStore} from "@/store/draft.js";
 import db from "@/db/db.js"
-import router from "@/router/index.js"
 
 defineOptions({
   name: 'draft'
@@ -89,7 +88,6 @@ async function jumpContent(email) {
   const att = await db.value.att.get(email.draftId)
   email.attachments = att.attachments
   writerStore.startDraft(email)
-  router.push({name: 'compose'})
 }
 
 </script>

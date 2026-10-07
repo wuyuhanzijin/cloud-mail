@@ -179,12 +179,10 @@ function handleKeyDown(event) {
 
 function openReply() {
   writerStore.startReply(email.value)
-  router.push({name: 'compose'})
 }
 
 function openForward() {
   writerStore.startForward(email.value)
-  router.push({name: 'compose'})
 }
 
 function toMessage(message) {
