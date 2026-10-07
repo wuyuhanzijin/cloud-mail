@@ -2,13 +2,15 @@
   <div class="box">
     <div class="header-actions">
       <Icon class="icon" icon="material-symbols-light:arrow-back-ios-new" width="20" height="20" @click="handleBack"/>
-      <Icon v-perm="'email:delete'" class="icon" icon="uiw:delete" width="16" height="16" @click="handleDelete"/>
-      <span class="star" v-if="emailStore.contentData.showStar">
-        <Icon class="icon" @click="changeStar" v-if="email.isStar" icon="fluent-color:star-16" width="20" height="20"/>
-        <Icon class="icon" @click="changeStar" v-else icon="solar:star-line-duotone" width="18" height="18"/>
-      </span>
-      <Icon class="icon" v-if="emailStore.contentData.showReply" v-perm="'email:send'"  @click="openReply" icon="la:reply" width="21" height="21" />
-      <Icon class="icon" v-if="emailStore.contentData.showReply" v-perm="'email:send'"  @click="openForward" icon="iconoir:arrow-up-right" width="20" height="20" />
+      <div class="actions-right">
+        <Icon v-perm="'email:delete'" class="icon" icon="uiw:delete" width="16" height="16" @click="handleDelete"/>
+        <span class="star" v-if="emailStore.contentData.showStar">
+          <Icon class="icon" @click="changeStar" v-if="email.isStar" icon="fluent-color:star-16" width="20" height="20"/>
+          <Icon class="icon" @click="changeStar" v-else icon="solar:star-line-duotone" width="18" height="18"/>
+        </span>
+        <Icon class="icon" v-if="emailStore.contentData.showReply" v-perm="'email:send'"  @click="openReply" icon="la:reply" width="21" height="21" />
+        <Icon class="icon" v-if="emailStore.contentData.showReply" v-perm="'email:send'"  @click="openForward" icon="iconoir:arrow-up-right" width="20" height="20" />
+      </div>
     </div>
     <div></div>
     <el-scrollbar class="scrollbar">
@@ -19,10 +21,11 @@
         <div class="content">
           <div class="email-info">
             <div>
-              <div class="send"><span class="send-source">{{$t('from')}}</span>
+              <div class="send">
+                <span class="mail-avatar" :class="'tone-' + senderTone">{{ senderInitial }}</span>
                 <div class="send-name">
                   <span class="send-name-title">{{ email.name }}</span>
-                  <span><{{ email.sendEmail }}></span>
+                  <span class="send-addr">&lt;{{ email.sendEmail }}&gt;</span>
                 </div>
               </div>
               <div class="receive"><span class="source">{{$t('recipient')}}</span><span class="receive-email">{{  formateReceive(email.recipient) }}</span></div>
@@ -87,6 +90,7 @@ import {starAdd, starCancel} from "@/request/star.js";
 import {getExtName, formatBytes} from "@/utils/file-utils.js";
 import {cvtR2Url,toOssDomain} from "@/utils/convert.js";
 import {getIconByName} from "@/utils/icon-utils.js";
+import {avatarInitial, avatarTone} from "@/utils/avatar.js";
 import {useSettingStore} from "@/store/setting.js";
 import {allEmailDelete} from "@/request/all-email.js";
 import {useUiStore} from "@/store/ui.js";
@@ -107,6 +111,9 @@ const email = computed(() => emailStore.contentData.email || {
 })
 const showPreview = ref(false)
 const srcList = reactive([])
+
+const senderInitial = computed(() => avatarInitial(email.value.name || email.value.sendEmail))
+const senderTone = computed(() => avatarTone(email.value.name || email.value.sendEmail))
 
 const { t } = useI18n()
 watch(() => accountStore.currentAccountId, () => {
@@ -276,10 +283,17 @@ const handleDelete = () => {
   padding: 0 18px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  justify-content: space-between;
   box-shadow: var(--header-actions-border);
   font-size: 18px;
   color: var(--regular-text-color);
+
+  .actions-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
   .star {
     display: flex;
     align-items: center;
@@ -449,12 +463,19 @@ const handleDelete = () => {
 
       .send {
         display: flex;
-        align-items: baseline;
-        margin-bottom: 5px;
+        align-items: center;
+        margin-bottom: 6px;
         min-width: 0;
 
+        .mail-avatar {
+          width: 36px;
+          height: 36px;
+          font-size: 15px;
+          margin-right: 12px;
+        }
+
         .send-name {
-          color: var(--regular-text-color);
+          color: var(--secondary-text-color);
           display: flex;
           flex-wrap: wrap;
           align-items: baseline;
@@ -466,12 +487,13 @@ const handleDelete = () => {
         .send-name-title {
           color: var(--el-text-color-primary);
           font-weight: 600;
-          font-size: 14px;
+          font-size: 15px;
         }
       }
 
       .receive {
         margin-bottom: 4px;
+        padding-left: 48px;
         display: flex;
         align-items: baseline;
         min-width: 0;
@@ -483,15 +505,6 @@ const handleDelete = () => {
         span:nth-child(2) {
           color: var(--regular-text-color);
         }
-      }
-
-      .send-source {
-        white-space: nowrap;
-        font-weight: 500;
-        font-size: 12px;
-        color: var(--secondary-text-color);
-        padding-right: 12px;
-        min-width: 3.9em;
       }
 
       .source {

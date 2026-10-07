@@ -38,6 +38,7 @@
           <template #default="{ data: item, index }" >
             <div :class="['email-row', props.type, { 'right-checked': item.rightChecked }]"
                  :data-checked="item.checked"
+                 :data-unread="item.unread === EmailUnreadEnum.UNREAD && showUnread"
                  @click="jumpDetails(item)"
                  v-if="!item.expand"
                  :key="item.emailId"
@@ -52,6 +53,7 @@
                 <Icon v-else icon="solar:star-line-duotone" width="18" height="18"/>
               </div>
               <div v-if="!showStar"></div>
+              <div class="mail-avatar" :class="'tone-' + (item.avatarTone || 0)">{{ item.avatarText }}</div>
               <div class="title" :class="accountShow ? 'title-column' : 'title-column'">
 
                 <div class="email-sender" :style=" (showStatus ? 'gap: 10px;' : '') + ((item.unread === EmailUnreadEnum.UNREAD && showUnread)  ? 'font-weight: bold' : '')">
@@ -241,6 +243,7 @@ import {useUiStore} from "@/store/ui.js";
 import {useSettingStore} from "@/store/setting.js";
 import {sleep} from "@/utils/time-utils.js"
 import {fromNow} from "@/utils/day.js";
+import {avatarInitial, avatarTone} from "@/utils/avatar.js";
 import {useI18n} from "vue-i18n";
 import {EmailUnreadEnum} from "@/enums/email-enum.js";
 import { UseVirtualList } from '@vueuse/components'
@@ -871,6 +874,8 @@ function handleList(list) {
       email.isDelContent = t('selectDeleted');
     }
     email.statusIcon = statusIconMap[email.status];
+    email.avatarText = avatarInitial(email.name || email.sendEmail)
+    email.avatarTone = avatarTone(email.name || email.sendEmail)
   })
 }
 
@@ -972,6 +977,7 @@ function loadData() {
   position: relative;
   transition: background 0.12s ease;
   height: 56px;
+  background: var(--mail-read-bg);
   @media (max-width: 1366px) {
     height: 88px;
   }
@@ -1052,7 +1058,7 @@ function loadData() {
   .title {
     flex: 1;
     display: grid;
-    grid-template-columns: 190px 1fr;
+    grid-template-columns: 170px 1fr;
     column-gap: 12px;
     @media (max-width: 1366px) {
       padding-right: 15px;
@@ -1217,6 +1223,18 @@ function loadData() {
     @media (max-width: 1366px) {
       display: none;
     }
+  }
+
+  /* 未读比已读更亮一点，跟 Gmail 一致（暗色下反过来是更浅的底色） */
+  &[data-unread="true"] {
+    background: var(--mail-unread-bg);
+  }
+
+  .mail-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+    margin-right: 14px;
   }
 
   &:hover {

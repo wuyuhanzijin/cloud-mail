@@ -4,12 +4,29 @@
       <hanburger @click="changeAside"></hanburger>
       <span class="breadcrumb-item">{{ $t(route.meta.title) }}</span>
     </div>
-    <div v-perm="'email:send'" class="writer-box" @click="openSend">
-      <div class="writer">
-        <Icon icon="material-symbols:edit-outline-sharp" width="22" height="22"/>
-      </div>
-    </div>
     <div class="toolbar">
+      <div v-perm="'email:send'" class="writer-box" @click="openSend">
+        <div class="writer">
+          <Icon icon="material-symbols:edit-outline-sharp" width="22" height="22"/>
+        </div>
+      </div>
+      <el-dropdown v-if="canManage" :teleported="false" trigger="click" placement="bottom-end"
+                   popper-class="manage-dropdown">
+        <div class="icon-item manage-entry" :title="$t('manage')">
+          <Icon icon="akar-icons:dot-grid-fill" width="18" height="18"/>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item v-for="item in manageItems" :key="item.name"
+                              @click="router.push({name: item.name})">
+              <div class="manage-row">
+                <Icon :icon="item.icon" width="18" height="18"/>
+                <span>{{ $t(item.label) }}</span>
+              </div>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
       <div v-if="uiStore.dark" class="sun-icon icon-item" @click="openDark($event)">
         <Icon icon="mingcute:sun-fill"/>
       </div>
@@ -94,6 +111,23 @@ const uiStore = useUiStore();
 const logoutLoading = ref(false)
 const userInfoShow = ref(false)
 const userinfoRef = ref({})
+
+const MANAGE_ITEMS = [
+  {name: 'analysis', icon: 'fluent:data-pie-20-regular', label: 'analytics', perm: 'analysis:query'},
+  {name: 'user', icon: 'si:user-alt-2-line', label: 'allUsers', perm: 'user:query'},
+  {name: 'all-email', icon: 'fluent:mail-list-28-regular', label: 'allMail', perm: 'all-email:query'},
+  {name: 'role', icon: 'fluent:lock-closed-16-regular', label: 'permissions', perm: 'role:query'},
+  {name: 'reg-key', icon: 'fluent:fingerprint-20-filled', label: 'inviteCode', perm: 'reg-key:query'},
+  {name: 'sys-setting', icon: 'eos-icons:system-ok-outlined', label: 'SystemSettings', perm: 'setting:query'}
+]
+
+const permKeys = computed(() => userStore.user?.permKeys || [])
+
+const manageItems = computed(() => {
+  return MANAGE_ITEMS.filter(item => permKeys.value.includes('*') || permKeys.value.includes(item.perm))
+})
+
+const canManage = computed(() => manageItems.value.length > 0)
 
 const accountCount = computed(() => {
   return userStore.user.role.accountCount
@@ -361,16 +395,11 @@ function formatName(email) {
 
 
 .header {
-  text-align: right;
   font-size: 12px;
-  display: grid;
+  display: flex;
+  align-items: center;
   height: 100%;
   gap: 8px;
-  grid-template-columns: auto auto 1fr;
-}
-
-.header.not-send {
-  grid-template-columns: auto 1fr;
 }
 
 .writer-box {
@@ -428,6 +457,7 @@ function formatName(email) {
   display: flex;
   align-items: center;
   justify-content: end;
+  margin-left: auto;
   gap: 6px;
   @media (max-width: 767px) {
     gap: 4px;
@@ -494,5 +524,28 @@ function formatName(email) {
 
 .el-tooltip__trigger:first-child:focus-visible {
   outline: unset;
+}
+
+/* 管理入口挪到右上角 */
+.manage-entry {
+  color: var(--regular-text-color);
+}
+
+.manage-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+}
+
+:deep(.manage-dropdown.el-popper) {
+  border-radius: 10px;
+}
+
+/* 宽屏用侧边栏里的「写邮件」胶囊按钮，窄屏保留顶栏这个图标按钮 */
+@media (min-width: 1025px) {
+  .writer-box {
+    display: none;
+  }
 }
 </style>
